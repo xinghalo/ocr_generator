@@ -11,7 +11,7 @@ import glob
 
 
 def main():
-    root_dir = '/data1/Users/xingoo/Desktop/ocr_v1'
+    root_dir = '/data1/ocr'
     data = OCRData(root_dir)
     data.makeNeededDir()
     data.args['classes_number'] = 200
