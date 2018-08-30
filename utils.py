@@ -63,7 +63,7 @@ def makeDirectory(path):
 
 def getBackgroundListFromDir(background_dir):
     image_path_list = []
-    image_path_list.extend([path for path in pathlib.Path(background_dir).rglob('*.jpg')])
+    image_path_list.extend([path for path in pathlib.Path(background_dir).rglob('*.jpeg')])
     print('Load backgroudn image: %d'%len(image_path_list))
     return image_path_list
 
@@ -74,6 +74,12 @@ def getFontListFromDir(font_dir):
     return font_path_list
 
 def get_content(id_character_dict, length_range_tuple):
+    """
+    通过tuple，随机选择文字
+    :param id_character_dict:
+    :param length_range_tuple:
+    :return:
+    """
     length = len(id_character_dict)
     rand_len = random.randint(length_range_tuple[0], length_range_tuple[1])
     content = u''
@@ -85,6 +91,13 @@ def get_content(id_character_dict, length_range_tuple):
     return content, content_index
 
 def get_contents(id_character_dict, length_range_tuple, line_number=2):
+    """
+    生成文本
+    :param id_character_dict:
+    :param length_range_tuple:
+    :param line_number:
+    :return:
+    """
     contents, contents_index = [], []
     for i in range(line_number):
         content, content_index = get_content(id_character_dict, length_range_tuple)
@@ -187,7 +200,7 @@ def setColor(roi_img):
     #     else:
     #         color[s] = random.randint(230,255)
     # 只创建灰色-黑色
-    c = random.randint(100,255)
+    c = random.randint(0,150)
     return np.array([c, c, c],dtype='float64')
 
 def pltImage2Array(image):

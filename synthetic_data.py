@@ -20,7 +20,7 @@ def main():
     print(data.args)
     
     data.saveTopNCharacters2File(data.args['characters_file_path'], data.args['classes_number'], data.args['id_character_file_path'])
-    data.args['image_number'] = data.args['classes_number']*800
+    data.args['image_number'] = data.args['classes_number']*8000
     data.synthesizeAllImages(data.args['image_number'])
 
 
@@ -70,9 +70,12 @@ class OCRData(object):
     def synthesizeAllImages(self, image_number):
         self.bg_img_list = utils.getBackgroundListFromDir(self.args['background_image_dir'])
         self.font_list = utils.getFontListFromDir(self.args['fonts_dir'])
+        # 找到最大值
         start_index = self.restoreFromPartImageDir()
         for i in tqdm.tqdm(range(start_index, image_number)):
+            # 随机出来的文本
             content, content_index = utils.get_contents(self.id_character_dict, self.args['characters_length_tuple'])
+            # 随机背景和字体
             background_image_path, font_path = map(utils.getRandomOneFromList, [self.bg_img_list, self.font_list])
             image, points = self.putContent2Image(content, background_image_path, font_path, self.args['add_rectangle'])
             if self.args['save_full_image']:
@@ -100,13 +103,18 @@ class OCRData(object):
         try:
             image = Image.open(background_image_path)
             mulcontents_points = []
+            # 通过背景图片的大小，计算每个字符最大的宽度。
+            # 如果宽度小于最小的字体大小，则去扩展图片（我这里的图片背景都很大，不需要做什么）
             font_size_max = image.size[0]//self.args['characters_length_tuple'][1]
             while font_size_max < self.args['font_size_min']:
                 resize_rate = resize_rate * 2
                 image = image.resize((image.size[0]*resize_rate, image.size[1]*resize_rate))
                 font_size_max = image.size[0]//self.args['characters_length_tuple'][1]
+            # 确定字体的大小
             font_size = random.randint(self.args['font_size_min'], font_size_max)
+            # 获得文字起始点
             left_center_point= (random.randint(0, image.size[0]-font_size*max([len(i) for i in mulcontents])), random.randint(font_size*len(mulcontents), image.size[1]-font_size*len(mulcontents)/2))
+            # 计算文字颜色，我这里只需要灰白的，直接RGB相等然后随机就行了
             color = utils.setColor(image)
             for content in mulcontents:
                 content_points = []
@@ -132,6 +140,7 @@ class OCRData(object):
         width, height = font.getsize(character)
         
         txt = Image.new('RGBA', (width, height), (255,255,255,0))
+        # 得到四个点的坐标
         points_in_txt = utils.getPointsOfImageRectangle(width, height)
         draw = ImageDraw.Draw(txt)
         draw.text((0, 0), character, font=font, fill=(255,255,255,255))  # draw text, full opacity
