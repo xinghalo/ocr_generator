@@ -22,10 +22,10 @@ def augmentImage(txt_img, points):
     distort_rate = random.uniform(0, 1)
     
     if rot < 1:
-        rot_degree = random.randint(-10, 10)
+        rot_degree = random.randint(-5, 5)
         txt_img, points = rotate_img(txt_img, rot_degree)
     elif skew_rate < 0:  # 平行四边形形变
-        skew = aug.Skew(1, 'RANDOM', 0.5)
+        skew = aug.Skew(1, 'RANDOM', 0.3)
         txt_img, points = skew.perform_operation(txt_img)
     elif shear_rate < 0:  # 剪切形变
         shear= aug.Shear(1., 5, 5)
@@ -106,13 +106,8 @@ def get_contents(id_character_dict, length_range_tuple, line_number=2):
     return contents, contents_index
 
 def saveImage2Dir(image, image_save_dir, image_name='test_image'):
-    if type(image) == list:
-        for index, one_image in enumerate(image):
-            one_image = one_image.resize((280, 32), Image.ANTIALIAS)
-            saveImage2Dir(one_image, image_save_dir, image_name=image_name+'_'+str(index))
-    else:
-        image_save_path = os.path.join(image_save_dir, image_name+'.jpg')
-        image.save(image_save_path)
+    image_save_path = os.path.join(image_save_dir, image_name + '.jpg')
+    image.save(image_save_path)
 
 def rotate_img(image, degree):
     img = np.array(image)
@@ -155,7 +150,7 @@ def mergeImageAtPoint(image, txt_img, left_top_point, color):
     image  = pltImage2Array(image)
     
     w, h = txt_img.size
-    assert (left+w) <= image.shape[1] and (top+h) <= image.shape[0]  # numpy.shape: height, width, channel
+    #assert (left+w) <= image.shape[1] and (top+h) <= image.shape[0]  # numpy.shape: height, width, channel
     res_img = np.array(image)
 
     roi_img = image[top:(top+h), left:(left+w),:]
@@ -167,7 +162,8 @@ def mergeImageAtPoint(image, txt_img, left_top_point, color):
 
     for i in range(0,h-1):
         for j in range(0,w-1):
-            res_img[i+top,j+left,:] = color*mask1[i,j] + (1-mask1[i,j])*res_img[i+top,j+left,:]
+            if i+top < res_img.shape[0] and j+left < res_img.shape[1]:
+                res_img[i+top,j+left,:] = color*mask1[i,j] + (1-mask1[i,j])*res_img[i+top,j+left,:]
 
     res_img = res_img[:,:,[2,1,0]]
     res_img = Image.fromarray(res_img)
